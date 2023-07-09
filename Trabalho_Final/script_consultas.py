@@ -18,7 +18,7 @@ original_df = df_feb.union(df_sep)
 # ------------------------------------------- #
 # Parte 1: Ganho médio por milha por mês por VendorId
 
-df_sum: DataFrame = original_df.groupBy("VendorId", "Month").sum("Total_amount", "Trip_distance")\
+df_sum: DataFrame = df.where("Trip_distance > 0").groupBy("VendorId", "Month").sum("Total_amount", "Trip_distance")\
     .withColumnRenamed("sum(Total_amount)", "GainsPerVendor")\
     .withColumnRenamed("sum(Trip_distance)", "DistanceTraveled")
 
@@ -26,8 +26,7 @@ df_sum: DataFrame = original_df.groupBy("VendorId", "Month").sum("Total_amount",
 df_sum = df_sum.withColumn(
     "AverageGains", col("GainsPerVendor")/col("DistanceTraveled"))
 
-df_sum.select(["VendorId", "Month", "AverageGains"]).orderBy(
-    ['VendorId', 'Month'], ascending=True).show()
+df_sum.select("VendorId", "Month", "AverageGains").orderBy('VendorId', 'Month', ascending=True).show()
 
 # ------------------------------------------- #
 # Parte 2: Taxa de corridas canceladas por mês

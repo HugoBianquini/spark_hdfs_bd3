@@ -9,29 +9,29 @@ sc = SparkContext("local", "PySpark Word Count")
 spark = SparkSession.builder.getOrCreate()
 
 df_jan = spark.read.parquet(
-    "yellow_tripdatas/yellow_tripdata_2022-01.parquet").withColumn("Month", lit("january"))
+    "yellow_tripdatas/yellow_tripdata_2022-01.parquet").withColumn("Month", lit(1))
 df_feb = spark.read.parquet(
-    "yellow_tripdatas/yellow_tripdata_2022-02.parquet").withColumn("Month", lit("february"))
+    "yellow_tripdatas/yellow_tripdata_2022-02.parquet").withColumn("Month", lit(2))
 df_mar = spark.read.parquet(
-    "yellow_tripdatas/yellow_tripdata_2022-03.parquet").withColumn("Month", lit("march"))
+    "yellow_tripdatas/yellow_tripdata_2022-03.parquet").withColumn("Month", lit(3))
 df_apr = spark.read.parquet(
-    "yellow_tripdatas/yellow_tripdata_2022-04.parquet").withColumn("Month", lit("april"))
+    "yellow_tripdatas/yellow_tripdata_2022-04.parquet").withColumn("Month", lit(4))
 df_may = spark.read.parquet(
-    "yellow_tripdatas/yellow_tripdata_2022-05.parquet").withColumn("Month", lit("may"))
+    "yellow_tripdatas/yellow_tripdata_2022-05.parquet").withColumn("Month", lit(5))
 df_jun = spark.read.parquet(
-    "yellow_tripdatas/yellow_tripdata_2022-06.parquet").withColumn("Month", lit("june"))
+    "yellow_tripdatas/yellow_tripdata_2022-06.parquet").withColumn("Month", lit(6))
 df_jul = spark.read.parquet(
-    "yellow_tripdatas/yellow_tripdata_2022-07.parquet").withColumn("Month", lit("july"))
+    "yellow_tripdatas/yellow_tripdata_2022-07.parquet").withColumn("Month", lit(7))
 df_aug = spark.read.parquet(
-    "yellow_tripdatas/yellow_tripdata_2022-08.parquet").withColumn("Month", lit("august"))
+    "yellow_tripdatas/yellow_tripdata_2022-08.parquet").withColumn("Month", lit(8))
 df_sep = spark.read.parquet(
-    "yellow_tripdatas/yellow_tripdata_2022-09.parquet").withColumn("Month", lit("september"))
+    "yellow_tripdatas/yellow_tripdata_2022-09.parquet").withColumn("Month", lit(9))
 df_oct = spark.read.parquet(
-    "yellow_tripdatas/yellow_tripdata_2022-10.parquet").withColumn("Month", lit("october"))
+    "yellow_tripdatas/yellow_tripdata_2022-10.parquet").withColumn("Month", lit(10))
 df_nov = spark.read.parquet(
-    "yellow_tripdatas/yellow_tripdata_2022-11.parquet").withColumn("Month", lit("november"))
+    "yellow_tripdatas/yellow_tripdata_2022-11.parquet").withColumn("Month", lit(11))
 df_dec = spark.read.parquet(
-    "yellow_tripdatas/yellow_tripdata_2022-12.parquet").withColumn("Month", lit("december"))
+    "yellow_tripdatas/yellow_tripdata_2022-12.parquet").withColumn("Month", lit(12))
 
 df = df_jan.union(df_feb).union(df_mar).union(df_apr) \
     .union(df_may).union(df_jun).union(df_jul) \
@@ -49,8 +49,8 @@ df = df.withColumn("Total_amount", when(col("Total_amount") < 0, abs(col("Total_
 
 # invertendo a data de embarque com a data de desembarque, quando o desembarque aconteceu antes do embarque
 df = df.withColumn("dropoff_save", when(col("tpep_pickup_datetime") > col("tpep_dropoff_datetime"), col("tpep_dropoff_datetime")))\
-    .withColumn("tpep_dropoff_datetime", when(col("tpep_pickup_datetime") > col("tpep_dropoff_datetime"), col("tpep_pickup_datetime")).otherwise(col("tpep_pickup_datetime")))\
-    .withColumn("tpep_pickup_datetime", when(col("tpep_pickup_datetime") > col("dropoff_save"), col("dropoff_save")).otherwise(col("tpep_dropoff_datetime")))\
+    .withColumn("tpep_dropoff_datetime", when(col("tpep_pickup_datetime") > col("tpep_dropoff_datetime"), col("tpep_pickup_datetime")).otherwise(col("tpep_dropoff_datetime")))\
+    .withColumn("tpep_pickup_datetime", when(col("tpep_pickup_datetime") > col("dropoff_save"), col("dropoff_save")).otherwise(col("tpep_pickup_datetime")))\
     .drop(col("dropff_save"))
 
 # resolvendo inconsistencias das corridas canceladas
