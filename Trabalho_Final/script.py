@@ -54,5 +54,5 @@ df = df.withColumn("dropoff_save", when(col("tpep_pickup_datetime") > col("tpep_
     .drop(col("dropff_save"))
 
 # resolvendo inconsistencias das corridas canceladas
-df.withColumn("Trip_distance", when(col("tpep_pickup_datetime") == col("tpep_dropoff_datetime"), lit(0)).otherwise(col("Trip_distance")))\
+df = df.withColumn("Trip_distance", when(col("tpep_pickup_datetime") == col("tpep_dropoff_datetime"), lit(0)).otherwise(col("Trip_distance")))\
     .withColumn("DOLocationID", when(col("tpep_pickup_datetime") == col("tpep_dropoff_datetime"), col("PULocationID")).otherwise(col("DOLocationID")))
