@@ -1,6 +1,6 @@
 # IMPLEMENTAR SCRIPT
 from pyspark import RDD
-from pyspark.sql.functions import udf, col, to_date, lit, year
+from pyspark.sql.functions import udf, col, lit, year, when, to_date, to_timestamp, date_format
 from pyspark.sql import SparkSession
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import *
@@ -26,7 +26,11 @@ df = df_jan.union(df_feb).union(df_mar).union(df_apr) \
         .union(df_aug).union(df_sep).union(df_oct) \
         .union(df_nov).union(df_dec)
 
-df.select(year("tpep_pickup_datetime").alias("year")).where("year != 2022").groupBy("year")
+# invertendo a data de embarque com a data de desembarque, quando o desembarque aconteceu antes do embarque
+df = df.withColumn("dropoff_save", when(col("tpep_pickup_datetime") > col("tpep_dropoff_datetime"), col("tpep_dropoff_datetime")))\
+        .withColumn("tpep_dropoff_datetime", when(col("tpep_pickup_datetime") > col("tpep_dropoff_datetime"), col("tpep_pickup_datetime")))\
+        .withColumn("tpep_pickup_datetime", when(col("tpep_pickup_datetime") > col("dropoff_save"), col("dropoff_save")))\
+        .drop(col("dropff_save"))
 
 #df.select(to_date(col("tpep_pickup_datetime"), "yyyy-MM").alias("DatePick")).groupBy("DatePick").count().show()
 #df_sum = df.groupBy("VendorId").sum("Total_amount", "Trip_distance")\
