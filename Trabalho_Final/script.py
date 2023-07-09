@@ -38,9 +38,14 @@ df = df_jan.union(df_feb).union(df_mar).union(df_apr) \
     .union(df_aug).union(df_sep).union(df_oct) \
     .union(df_nov).union(df_dec)
 
+# trocando o tipo de pagamento de 0 para 2(cash)
+df = df.withColumn("Payment_type", when(col("Payment_type") == 0, lit(2)).otherwise(col("Payment_type")))
+
+# alterando os valores de custo para 0 quando o tipo de pagamento for 3(no charge)
+df = df.withColumn("Total_amount", when(col("Payment_type")==3, lit(0.0)).otherwise(col("Total_amount")))
+
 # transformando valores negativos do Total_amount para positivo
-df = df.withColumn("Total_amount", when(col("Total_amount") < 0, abs(
-    col("Total_amount"))).otherwise(col("Total_amount")))
+df = df.withColumn("Total_amount", when(col("Total_amount") < 0, abs(col("Total_amount"))).otherwise(col("Total_amount")))
 
 # invertendo a data de embarque com a data de desembarque, quando o desembarque aconteceu antes do embarque
 df = df.withColumn("dropoff_save", when(col("tpep_pickup_datetime") > col("tpep_dropoff_datetime"), col("tpep_dropoff_datetime")))\
@@ -51,9 +56,3 @@ df = df.withColumn("dropoff_save", when(col("tpep_pickup_datetime") > col("tpep_
 # resolvendo inconsistencias das corridas canceladas
 df.withColumn("Trip_distance", when(col("tpep_pickup_datetime") == col("tpep_dropoff_datetime"), lit(0)).otherwise(col("Trip_distance")))\
     .withColumn("DOLocationID", when(col("tpep_pickup_datetime") == col("tpep_dropoff_datetime"), col("PULocationID")).otherwise(col("DOLocationID")))
-
-# df.select(to_date(col("tpep_pickup_datetime"), "yyyy-MM").alias("DatePick")).groupBy("DatePick").count().show()
-# df_sum = df.groupBy("VendorId").sum("Total_amount", "Trip_distance")\
-# .withColumnRenamed("sum(Total_amount)", "GainsPerVendor")\
-# .withColumnRenamed("sum(Trip_distance)", "DistanceTraveled")
-# df_sum.withColumn("AverageGains", col("GainsPerVendor")/col("DistanceTraveled")).show()
