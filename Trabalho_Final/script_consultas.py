@@ -49,7 +49,7 @@ df_with_avg = original_df.join(df_with_avg.where(
 
 # Filtrar apenas as viagens canceladas e agrupar por mês
 df_canceled_trips: DataFrame = df_with_avg.filter((df_with_avg.tpep_pickup_datetime == df_with_avg.tpep_dropoff_datetime)
-                                                  & (df_with_avg.trip_distance == 0)
+                                                  & (df_with_avg.Trip_distance == 0)
                                                   & (df_with_avg.PULocationID == df_with_avg.DOLocationID))\
     .groupBy('VendorId', 'Month').count().withColumnRenamed('count', 'CanceledTripsPerMonth')
 
