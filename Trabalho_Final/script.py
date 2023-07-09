@@ -1,6 +1,6 @@
 # IMPLEMENTAR SCRIPT
 from pyspark import RDD
-from pyspark.sql.functions import udf, col, lit, year, when, to_date, to_timestamp, date_format
+from pyspark.sql.functions import col, lit, when, abs
 from pyspark.sql import SparkSession
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import *
@@ -25,11 +25,14 @@ df = df_jan.union(df_feb).union(df_mar).union(df_apr) \
         .union(df_may).union(df_jun).union(df_jul) \
         .union(df_aug).union(df_sep).union(df_oct) \
         .union(df_nov).union(df_dec)
+        
+#transformando valores negativos do Total_amount para positivo
+df = df.withColumn("Total_amount", when(col("Total_amount") < 0, abs(col("Total_amount"))).otherwise(col("Total_amount")))
 
 # invertendo a data de embarque com a data de desembarque, quando o desembarque aconteceu antes do embarque
 df = df.withColumn("dropoff_save", when(col("tpep_pickup_datetime") > col("tpep_dropoff_datetime"), col("tpep_dropoff_datetime")))\
-        .withColumn("tpep_dropoff_datetime", when(col("tpep_pickup_datetime") > col("tpep_dropoff_datetime"), col("tpep_pickup_datetime")))\
-        .withColumn("tpep_pickup_datetime", when(col("tpep_pickup_datetime") > col("dropoff_save"), col("dropoff_save")))\
+        .withColumn("tpep_dropoff_datetime", when(col("tpep_pickup_datetime") > col("tpep_dropoff_datetime"), col("tpep_pickup_datetime")).otherwise(col("tpep_pickup_datetime")))\
+        .withColumn("tpep_pickup_datetime", when(col("tpep_pickup_datetime") > col("dropoff_save"), col("dropoff_save")).otherwise(col("tpep_dropoff_datetime")))\
         .drop(col("dropff_save"))
 
 #df.select(to_date(col("tpep_pickup_datetime"), "yyyy-MM").alias("DatePick")).groupBy("DatePick").count().show()
