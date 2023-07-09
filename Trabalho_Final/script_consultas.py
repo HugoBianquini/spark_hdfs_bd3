@@ -16,7 +16,7 @@ df_sep = spark.read.parquet(
 original_df = df_feb.union(df_sep)
 
 # ------------------------------------------- #
-# Parte 1: Ganho médio por milha por mês por VendorId
+# PARTE 1: Ganho médio por milha por mês por VendorId
 
 df_sum: DataFrame = original_df.groupBy("VendorId", "Month").sum("Total_amount", "Trip_distance")\
     .withColumnRenamed("sum(Total_amount)", "GainsPerVendor")\
@@ -30,7 +30,7 @@ df_sum.select(["VendorId", "Month", "AverageGains"]).orderBy(
     ['VendorId', 'Month'], ascending=True).show()
 
 # ------------------------------------------- #
-# Parte 2: Taxa de corridas canceladas por mês
+# PARTE 2: Taxa de corridas canceladas por mês
 # para os taxistas que possuem o ganho médio por milha superior a média geral
 
 # GroupBy vazio para pegar media geral
@@ -48,10 +48,17 @@ df_with_avg = df_sum.withColumn("TotalAvg", lit(
 df_with_avg = original_df.join(df_with_avg.where(
     col('AnualAvgPerVendor') > col('TotalAvg')), "VendorId")
 
-df_with_avg.groupBy('VendorId').count().show()
+# Filtrar apenas as viagens canceladas e agrupar por mês
+df_canceled_trips: DataFrame = df_with_avg.filter((df_with_avg.tpep_pickup_datetime == df_with_avg.tpep_dropoff_datetime)
+                                                  & (df_with_avg.trip_distance == 0)
+                                                  & (df_with_avg.PULocationID == df_with_avg.DOLocationID))\
+    .groupBy('VendorId', 'Month').count().withColumnRenamed('count', 'CanceledTripsPerMonth')
 
-# Próximos passos são manter apenas viagens canceladas para extrair a taxa de viagens canceladas por mês
+df_canceled_trips.show()
+
+df_canceled_trips.groupBy('VendorId').avg("CanceledTripsPerMonth").withColumnRenamed(
+    'avg(CanceledTripsPerMonth)', 'CanceledTripsPerYear').show()
 
 
 # ------------------------------------------- #
-# Parte 3: A fazer
+# PARTE 3: A fazer
