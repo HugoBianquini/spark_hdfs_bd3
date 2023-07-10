@@ -58,6 +58,29 @@ df_canceled_trips.show()
 df_canceled_trips.groupBy('VendorId').avg("CanceledTripsPerMonth").withColumnRenamed(
     'avg(CanceledTripsPerMonth)', 'CanceledTripsPerYear').show()
 
+# ------------------------------------------- #
+# PARTE 3: Ganho médio dos top 10 taxistas que mais rodaram no ano de 2022
+df_top_dist_year = df.groupBy("VendorId").sum("Total_amount", "Trip_distance")\
+    .withColumnRenamed("sum(Trip_distance)", "DistanceTraveled")\
+    .withColumnRenamed("sum(Total_amount)", "GainsPerVendor")\
+    .orderBy("DistanceTraveled", ascending=False)
+
+df_top_gain_year = df_top_dist_year.withColumn("AverageGains", col("GainsPerVendor")/col("DistanceTraveled")).orderBy('AverageGains', ascending=False)
+
+df_top_gain_year.select("VendorId", "AverageGains").show()
+
 
 # ------------------------------------------- #
-# PARTE 3: A fazer
+# Ganho médio dos top 10 taxistas que mais rodaram por mes no ano de 2022
+df_top_dist_month = df.groupBy("VendorId", "Month").sum("Total_amount", "Trip_distance")\
+    .withColumnRenamed("sum(Total_amount)", "GainsPerVendor")\
+    .withColumnRenamed("sum(Trip_distance)", "DistanceTraveled")
+
+df_top_gain_month = df_top_dist_month .withColumn("AverageGains", col("GainsPerVendor")/col("DistanceTraveled")).orderBy(asc("Month"), desc("AverageGains"))
+
+df_top_gain_month.select("VendorId", "Month", "AverageGains").show()
+
+
+# ------------------------------------------- #
+# PARTE 4: A ser realizada
+
