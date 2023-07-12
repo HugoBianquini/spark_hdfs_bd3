@@ -1,4 +1,3 @@
-# IMPLEMENTAR SCRIPT
 from pyspark import RDD
 from pyspark.sql.functions import udf, col, to_date, lit, round, when, asc, desc
 from pyspark.sql import SparkSession
@@ -130,25 +129,40 @@ df_2 = original_df.withColumn("Total_amount", when(col("Payment_type") == 1, rou
     "Total_amount") * 1.02, 2)).otherwise(col("Total_amount")))
 
 
+#################################### REFAZENDO CONSULTAS COM DATAFRAME ATUALIZADO ####################################
+
+
 # PARTE 5: Refazer tudo com o dataframe atualizado (df_2)
 
 print("\nRefazendo tudo com a adição da taxa de 2% para viagens pagas no cartão:\n")
+
+# Ganho médio por milha por mês por VendorId
+
+print("\nGanho médio por milha por mês (com 2%):\n")
 
 df_sum_2 = earnings_per_month(df_2)
 
 df_sum_2.select("VendorId", "Month", "AverageGains").orderBy(
     'VendorId', 'Month', ascending=True).show()
 
+print("\nTaxa de corridas canceladas por mês (com 2%):\n")
+
 df_canceled_trips_2 = canceled_trips_per_month(df_sum_2, df_2)
 
 df_canceled_trips_2.show()
 
+print("\nMédia de corridas canceladas no ano (com 2%):\n")
+
 df_canceled_trips_2.groupBy('VendorId').avg("CanceledTripsPerMonth").withColumnRenamed(
     'avg(CanceledTripsPerMonth)', 'CanceledTripsPerYear').show()
+
+print("\nGanho médio dos top 10 no ano (com 2%):\n")
 
 df_top_gain_year_2 = top_ten_per_year(df_2)
 
 df_top_gain_year_2.select("VendorId", "AverageGains").show()
+
+print("\nGanho médio dos top 10 por mes (com 2%):\n")
 
 df_top_gain_month_2 = top_ten_per_month(df_2)
 
