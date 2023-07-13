@@ -1,8 +1,7 @@
 # IMPLEMENTAR SCRIPT
-from pyspark import RDD
-from pyspark.sql.functions import col, lit, when, abs, asc, desc
+from pyspark.sql.functions import col, lit, when, abs, asc, desc, round
 from pyspark.sql import SparkSession
-from pyspark import SparkContext, SparkConf
+from pyspark import SparkContext
 from pyspark.sql import *
 
 
@@ -95,7 +94,7 @@ def canceled_trips_per_month(df_sum: DataFrame, original_df: DataFrame):
 
     # Filtrar apenas as viagens canceladas e agrupar por mês
     df_canceled_trips: DataFrame = df_with_avg.filter((df_with_avg.tpep_pickup_datetime == df_with_avg.tpep_dropoff_datetime)
-                                                      & (df_with_avg.trip_distance == 0)
+                                                      & (df_with_avg.Trip_distance == 0)
                                                       & (df_with_avg.PULocationID == df_with_avg.DOLocationID))\
         .groupBy('VendorId', 'Month').count().withColumnRenamed('count', 'CanceledTripsPerMonth')
 
